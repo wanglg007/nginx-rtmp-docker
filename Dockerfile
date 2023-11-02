@@ -38,12 +38,12 @@ RUN apk add --update \
 # (3.1)下载Nginx
 RUN mkdir -p /tmp/build/nginx && cd /tmp/build/nginx \
  && wget -O ${NGINX_VERSION}.tar.gz https://nginx.org/download/${NGINX_VERSION}.tar.gz \
- && tar -zxf ${NGINX_VERSION}.tar.gz
+ && tar -zxf ${NGINX_VERSION}.tar.gz && rm ${NGINX_VERSION}.tar.gz
 
-# (3.2)下载RTMP module
+# (3.2)下载v1.2.11.tar.gz
 RUN mkdir -p /tmp/build/nginx-http-flv-module && cd /tmp/build/nginx-http-flv-module   \
- && wget -O  nginx-http-flv-module.tar.gz https://github.com/winshining/nginx-http-flv-module/archive/refs/tags/${NGINX_HTTP_FLV_MODULE_VERSION}.tar.gz \
- && tar -zxf nginx-http-flv-module.tar.gz
+ && wget -O  nginx-http-flv-module.tar.gz https://github.com/winshining/nginx-http-flv-module/archive/refs/tags/v${NGINX_HTTP_FLV_MODULE_VERSION}.tar.gz \
+ && tar -zxf nginx-http-flv-module.tar.gz && rm nginx-http-flv-module.tar.gz
 
 # (3.3)编译nginx(Build and install Nginx)
 RUN cd /tmp/build/nginx/${NGINX_VERSION} \
@@ -63,14 +63,17 @@ RUN cd /tmp/build/nginx/${NGINX_VERSION} \
  && make install \
  && mkdir /var/lock/nginx && rm -rf /tmp/build
 
-# (3.4)Forward logs to Docker
+# (3.4)重定向docker日志
 RUN ln -sf /dev/stdout /var/log/nginx/access.log && ln -sf /dev/stderr /var/log/nginx/error.log
 
 ############################################################
 # (4)启动nginx
 ############################################################
-# Set up config file
+# (4.1)设置配置文件
 COPY nginx.conf /etc/nginx/nginx.conf
-
+# (4.2)开发端口
 EXPOSE 1935
+EXPOSE 80
+EXPOSE 443
+# (4.3)启动服务
 CMD ["nginx", "-g", "daemon off;"]
