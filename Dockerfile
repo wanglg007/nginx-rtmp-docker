@@ -1,21 +1,30 @@
+############################################################
+# (1)基础镜像
+############################################################
+# (1.1)基础镜像
 FROM buildpack-deps:bullseye
+# (1.2)作者
+LABEL maintainer="wanglg95"
 
-LABEL maintainer="Sebastian Ramirez <tiangolo@gmail.com>"
-
-# Versions of Nginx and nginx-rtmp-module to use
+############################################################
+# (2)配置信息
+############################################################
+# (2.1)设置nginx和nginx-http-flv-module版本
 ENV NGINX_VERSION nginx-1.23.2
-ENV NGINX_RTMP_MODULE_VERSION 1.2.2
+ENV NGINX_HTTP_FLV_MODULE_VERSION 1.2.10
 
-# Install dependencies
-RUN apt-get update && \
-    apt-get install -y ca-certificates openssl libssl-dev && \
-    rm -rf /var/lib/apt/lists/*
+# (2.2)安装相关依赖软件
+RUN apt-get update \
+ && apt-get install -y ca-certificates openssl libssl-dev build-essential  libidn11-dev libidn11 autoremove \
+ && rm -rf /var/lib/apt/lists/*
 
-# Download and decompress Nginx
-RUN mkdir -p /tmp/build/nginx && \
-    cd /tmp/build/nginx && \
-    wget -O ${NGINX_VERSION}.tar.gz https://nginx.org/download/${NGINX_VERSION}.tar.gz && \
-    tar -zxf ${NGINX_VERSION}.tar.gz
+############################################################
+# (3)安装nginx
+############################################################
+# (3.1)下载Nginx
+RUN mkdir -p /tmp/build/nginx && cd /tmp/build/nginx \
+ && wget -O ${NGINX_VERSION}.tar.gz https://nginx.org/download/${NGINX_VERSION}.tar.gz \
+ && tar -zxf ${NGINX_VERSION}.tar.gz
 
 # Download and decompress RTMP module
 RUN mkdir -p /tmp/build/nginx-rtmp-module && \
